@@ -3,21 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use App\Models\Student;
+use App\Models\Course;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+
 
 class DashboardController extends Controller
 {
-    public function __invoke(): RedirectResponse
+    public function index()
     {
-        $user = auth()->user();
+        $totalStudents = Student::count();
+        $totalCourses = Course::count();
+        $totalUsers = User::count();
+        $recentStudents = Student::latest()->take(5)->get();
 
-        if ($user->hasRole('admin')) {
-            return redirect()->route('students.index');
-        }
+        return view('dashboard', compact('totalStudents', 'totalCourses', 'totalUsers', 'recentStudents'));
 
-        if ($user->hasRole('lecturer')) {
-            return redirect()->route('courses.index');
-        }
-
-        return redirect()->route('registrations.index');
     }
 }
