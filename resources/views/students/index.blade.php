@@ -2,6 +2,13 @@
 @section('title', 'Students')
 @section('content')
 <div class="actions" style="justify-content:space-between"><h1>Students</h1><a class="button" href="{{ route('students.create') }}">Add student</a></div>
+<form method="GET" action="{{ route('students.index') }}" class="mb-6 flex gap-2">
+    <input type="text" name="search" value="{{ $search ?? '' }}" 
+           placeholder="Search by Name, Reg No, or Email..." 
+           class="w-full md:w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Search</button>
+    <a href="{{ route('students.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300">Reset</a>
+</form>
 <table>
     <thead><tr><th>Student number</th><th>Name</th><th>Email</th><th>Actions</th></tr></thead>
     <tbody>

@@ -12,35 +12,38 @@ use Illuminate\View\View;
 
 class StudentController extends Controller
 {
-    public function index(): View
+  public function index(Request $request)
     {
-        return view('students.index', [
-            'students' => Student::with('user')->orderBy('student_number')->paginate(15),
+        $search = $request->input('search');
+
+        $students = Student::when($search, function ($query, $search) {
+            return $query->where('name', 'like', "%{$search}%")
+                         ->orWhere('reg_number', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+        })->paginate(10);
+
+        return view('students.index', compact('students', 'search'));
+    }
+
+public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'reg_number'    => 'required|unique:students,reg_number',
+            'email'         => 'required|email|unique:students,email',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('students', 'public');
+            $validated['profile_photo'] = $path;
+        }
+
+        Student::create($validated);
+
+        return redirect()->route('students.index')->with('success', 'Student profile created!');
     }
-
-    public function create(): View
-    {
-        return view('students.form', ['student' => new Student()]);
-    }
-
-    public function store(Request $request): RedirectResponse
-    {
-        $data = $this->validated($request);
-
-        DB::transaction(function () use ($data): void {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'role' => User::ROLE_STUDENT,
-            ]);
-            $user->student()->create(['student_number' => $data['student_number']]);
-            $user->assignRole('student');
-        });
-
-        return redirect()->route('students.index')->with('status', 'Student account created.');
-    }
+}
 
     public function edit(Student $student): View
     {
