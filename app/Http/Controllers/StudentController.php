@@ -15,7 +15,8 @@ class StudentController extends Controller
     public function index(): View
     {
         return view('students.index', [
-            'students' => Student::with('user')->orderBy('student_number')->paginate(15),
+            'students' => Student,
+            'search' =>$search
         ]);
     }
 
@@ -33,6 +34,7 @@ class StudentController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
+                'image'=>$data['image'],
                 'role' => User::ROLE_STUDENT,
             ]);
             $user->student()->create(['student_number' => $data['student_number']]);
