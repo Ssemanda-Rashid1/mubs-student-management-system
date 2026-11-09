@@ -11,28 +11,36 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
-            $table->id();
-             $table->string('course_code')->unique();
-              $table->string('title');
-               $table->string('department');
+        if (!Schema::hasTable('courses')) {
+            Schema::create('courses', function (Blueprint $table) {
+                $table->id();
+                $table->string('course_code')->unique();
+                $table->string('title');
+                $table->string('department');
                 $table->integer('credit_units')->default(3);
                 $table->integer('capacity')->default(50);
-                $table->timestamp();
+                $table->timestamps();
             });
-    } 
+        }
 
-
-
-
-
-
+        if (!Schema::hasTable('students')) {
+            Schema::create('students', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('registration_number')->unique();
+                $table->string('email')->unique();
+                $table->string('course');
+                $table->timestamps();
+            });
+        }
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
+        Schema::dropIfExists('students');
         Schema::dropIfExists('courses');
     }
 };

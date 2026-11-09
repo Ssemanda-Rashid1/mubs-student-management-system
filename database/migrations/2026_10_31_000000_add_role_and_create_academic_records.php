@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('student')->index();
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->string('role')->default('student')->index();
+            }
         });
 
         Schema::create('students', function (Blueprint $table) {
@@ -57,8 +59,10 @@ return new class extends Migration
         Schema::dropIfExists('students');
 
         Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['role']);
-            $table->dropColumn('role');
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropIndex(['role']);
+                $table->dropColumn('role');
+            }
         });
     }
 };
