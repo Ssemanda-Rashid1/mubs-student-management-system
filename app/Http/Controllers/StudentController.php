@@ -9,42 +9,52 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Illuminate\Contracts\View\View;
 
 class StudentController extends Controller
 {
-  public function index(Request $request)
+    public function index(Request $request): View
     {
         $search = $request->input('search');
 
-        $students = Student::when($search, function ($query, $search) {
-            return $query->where('name', 'like', "%{$search}%")
-                         ->orWhere('reg_number', 'like', "%{$search}%")
-                         ->orWhere('email', 'like', "%{$search}%");
-        })->paginate(10);
+        $students = Student::with('user')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('student_number', 'like', "%{$search}%")
+                        ->orWhereHas('user', function ($user) use ($search) {
+                            $user->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->orderBy('student_number')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('students.index', compact('students', 'search'));
     }
 
-public function store(Request $request)
+    public function create(): View
     {
-        $validated = $request->validate([
-            'name'          => 'required|string|max:255',
-            'reg_number'    => 'required|unique:students,reg_number',
-            'email'         => 'required|email|unique:students,email',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('students', 'public');
-            $validated['profile_photo'] = $path;
-        }
-
-        Student::create($validated);
-
-        return redirect()->route('students.index')->with('success', 'Student profile created!');
+        return view('students.form', ['student' => new Student()]);
     }
-}
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $this->validated($request);
+
+        DB::transaction(function () use ($data): void {
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'role' => User::ROLE_STUDENT,
+            ]);
+            $user->student()->create(['student_number' => $data['student_number']]);
+            $user->assignRole('student');
+        });
+
+        return redirect()->route('students.index')->with('status', 'Student record created.');
+    }
 
     public function edit(Student $student): View
     {

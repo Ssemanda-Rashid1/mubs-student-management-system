@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegistrationController;
@@ -62,6 +61,3 @@ Route::middleware('auth')->group(function () {
         Route::patch('/users/{user}/role', [UserAccessController::class, 'updateRole'])->name('users.role');
     });
 });
-
-Route::get('/contact', [App\Http\Controllers\HomeController::class, 'contact'])->name('contact');
-Route::post('/store', [ContactController::class, 'store'])->name('contact.store');

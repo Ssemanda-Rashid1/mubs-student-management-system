@@ -1,139 +1,68 @@
-<x-layouts.app>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('System Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
+@section('title', 'Dashboard')
+@section('content')
+<h1>Welcome, {{ auth()->user()->name }}</h1>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <!-- Toast Notification Banner -->
-            @if(session('success'))
-                <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm">
-                    <p class="font-bold">Success</p>
-                    <p>{{ session('success') }}</p>
-                </div>
-            @endif
-
-            <!-- Analytics Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                    <div class="text-gray-500 text-sm font-medium">Total Registered Students</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalStudents ?? 0 }}</div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
-                    <div class="text-gray-500 text-sm font-medium">Active Courses</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalCourses ?? 0 }}</div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500">
-                    <div class="text-gray-500 text-sm font-medium">System Users</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalUsers ?? 0 }}</div>
-                </div>
-            </div>
-
-            <!-- Recent Registrations Table -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recently Enrolled Students</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
-                                <th class="p-3">Student Reg No</th>
-                                <th class="p-3">Full Name</th>
-                                <th class="p-3">Email</th>
-                                <th class="p-3">Joined Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
-                            @forelse($recentStudents as $student)
-                                <tr>
-                                    <td class="p-3 font-medium">{{ $student->reg_number }}</td>
-                                    <td class="p-3">{{ $student->name }}</td>
-                                    <td class="p-3">{{ $student->email }}</td>
-                                    <td class="p-3">{{ $student->created_at->format('d M Y') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="p-3 text-center text-gray-500">No recent registrations found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
+@role('admin')
+    <div class="actions" style="margin-bottom:1rem">
+        <div class="card"><div class="muted">Students</div><h2>{{ $totalStudents }}</h2></div>
+        <div class="card"><div class="muted">Courses</div><h2>{{ $totalCourses }}</h2></div>
+        <div class="card"><div class="muted">Users</div><h2>{{ $totalUsers }}</h2></div>
     </div>
-</x-app-layout><x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('System Dashboard') }}
-        </h2>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <!-- Toast Notification Banner -->
-            @if(session('success'))
-                <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm">
-                    <p class="font-bold">Success</p>
-                    <p>{{ session('success') }}</p>
-                </div>
-            @endif
+    <h2>Recently added students</h2>
+    <table>
+        <thead><tr><th>Student number</th><th>Name</th><th>Email</th><th>Added</th></tr></thead>
+        <tbody>
+        @forelse ($recentStudents as $student)
+            <tr>
+                <td>{{ $student->student_number }}</td>
+                <td>{{ $student->user->name }}</td>
+                <td>{{ $student->user->email }}</td>
+                <td>{{ $student->created_at->format('M j, Y') }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="4">No students yet.</td></tr>
+        @endforelse
+        </tbody>
+    </table>
+@endrole
 
-            <!-- Analytics Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                    <div class="text-gray-500 text-sm font-medium">Total Registered Students</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalStudents ?? 0 }}</div>
-                </div>
+@role('lecturer')
+    <h2>My assigned courses</h2>
+    <table>
+        <thead><tr><th>Code</th><th>Course</th><th>Registered students</th><th></th></tr></thead>
+        <tbody>
+        @forelse ($myCourses as $course)
+            <tr>
+                <td>{{ $course->code }}</td>
+                <td>{{ $course->title }}</td>
+                <td>{{ $course->students_count }}</td>
+                <td><a class="button secondary" href="{{ route('courses.show', $course) }}">View students</a></td>
+            </tr>
+        @empty
+            <tr><td colspan="4">No courses are assigned to you yet.</td></tr>
+        @endforelse
+        </tbody>
+    </table>
+@endrole
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
-                    <div class="text-gray-500 text-sm font-medium">Active Courses</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalCourses ?? 0 }}</div>
-                </div>
-
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500">
-                    <div class="text-gray-500 text-sm font-medium">System Users</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ $totalUsers ?? 0 }}</div>
-                </div>
-            </div>
-
-            <!-- Recent Registrations Table -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recently Enrolled Students</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
-                                <th class="p-3">Student Reg No</th>
-                                <th class="p-3">Full Name</th>
-                                <th class="p-3">Email</th>
-                                <th class="p-3">Joined Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
-                            @forelse($recentStudents as $student)
-                                <tr>
-                                    <td class="p-3 font-medium">{{ $student->reg_number }}</td>
-                                    <td class="p-3">{{ $student->name }}</td>
-                                    <td class="p-3">{{ $student->email }}</td>
-                                    <td class="p-3">{{ $student->created_at->format('d M Y') }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="p-3 text-center text-gray-500">No recent registrations found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</x-layouts.app>
+@role('student')
+    <h2>My registrations</h2>
+    <table>
+        <thead><tr><th>Course</th><th>Status</th><th>Registered</th></tr></thead>
+        <tbody>
+        @forelse ($myRegistrations as $registration)
+            <tr>
+                <td>{{ $registration->course->code }} — {{ $registration->course->title }}</td>
+                <td>{{ ucfirst($registration->status) }}</td>
+                <td>{{ $registration->created_at->format('M j, Y') }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="3">You have not registered for any course yet.</td></tr>
+        @endforelse
+        </tbody>
+    </table>
+    <p><a class="button" href="{{ route('registrations.create') }}">Register for a course</a></p>
+@endrole
+@endsection
