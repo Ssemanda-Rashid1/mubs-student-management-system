@@ -1,84 +1,126 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Student Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel application for managing students, courses, lecturers and course registrations.
+Built for BUC3131 Advanced Web Application Development, Coursework Two (2026/2027), Makerere University Business School.
 
-## About Laravel
+## Group Members
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Name | Registration No. | Feature Branch |
+|---|---|---|
+| [Name] | [Reg No] | [feature/...] |
+| [Name] | [Reg No] | [feature/...] |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP [version]
+- Composer
+- MySQL
+- Git
 
-## Student management data
+## Installation
 
-The database includes users with `admin`, `lecturer`, or `student` roles; student and lecturer profiles; lecturer-assigned courses; and student course registrations. Foreign keys maintain referential integrity, and a unique student/course pair prevents duplicate registrations.
+1. Clone the repository:
+   ```bash
+   git clone [repository URL]
+   cd [project folder]
+   ```
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
+3. Copy the environment file:
+   ```bash
+   cp .env.example .env
+   ```
+4. Create an empty MySQL database named `studentmgtsystem`.
+5. Open `.env` and set your database details:
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=studentmgtsystem
+   DB_USERNAME=your_mysql_username
+   DB_PASSWORD=your_mysql_password
+   ```
+6. Generate the application key:
+   ```bash
+   php artisan key:generate
+   ```
+7. Create the tables and load the sample data:
+   ```bash
+   php artisan migrate --seed
+   ```
+8. Start the server:
+   ```bash
+   php artisan serve
+   ```
+9. Open http://127.0.0.1:8000/login
 
-Spatie Laravel Permission stores roles and permissions. Seeded permissions allow administrators to manage academic records and user access, lecturers to view only their assigned courses and registrations, and students to browse courses and manage their own registrations.
+To reset the database completely, run `php artisan migrate:fresh --seed`.
 
-Install dependencies with `composer install`, copy `.env.example` to `.env`, configure the MySQL connection and create the `studentmgtsystem` database, then run `php artisan key:generate` and `php artisan migrate --seed` to create the schema, roles, permissions, and sample data. The seeder can be run repeatedly without adding duplicate sample records. Sign in at `/login`; students can create their own accounts at `/register`, and those accounts are always assigned the student role.
+## Database
 
-Seeded accounts use the password `password`:
+- Users have one role: `admin`, `lecturer` or `student` (Spatie Laravel Permission).
+- Students and lecturers have their own profile records linked to a user.
+- Each course belongs to a lecturer.
+- Students and courses are linked through course registrations.
+- Foreign keys enforce referential integrity, and a unique student/course pair prevents duplicate registrations.
+- Seeders can be run repeatedly without creating duplicate records.
+
+## User Roles
+
+| Role | What they can do |
+|---|---|
+| Administrator | Manage students, courses, registrations and user access |
+| Lecturer | View their assigned courses and the students registered in them |
+| Student | View available courses and manage their own registrations |
+
+Students can create their own accounts at `/register`. These accounts are always given the student role.
+
+## Sample Login Credentials
+
+All seeded accounts use the password `password`.
 
 | Role | Email |
 |---|---|
-| Administrator | `admin@university.test` |
-| Lecturer | `ada.lecturer@university.test` |
-| Lecturer | `alan.lecturer@university.test` |
-| Student | `maya.student@university.test` |
-| Student | `noah.student@university.test` |
-| Student | `zara.student@university.test` |
-| Student | `ethan.student@university.test` |
-| Student | `leah.student@university.test` |
+| Administrator | admin@university.test |
+| Lecturer | ada.lecturer@university.test |
+| Lecturer | alan.lecturer@university.test |
+| Student | maya.student@university.test |
+| Student | noah.student@university.test |
+| Student | zara.student@university.test |
+| Student | ethan.student@university.test |
+| Student | leah.student@university.test |
 
-Use the Eloquent relationships to retrieve registrations: `$student->courses` lists a student's courses, and `$course->students` lists the students registered for a course. Lecturers access their assigned courses with `$lecturer->courses`.
+Change these passwords before deploying the application.
 
-The demo accounts share the password `password`; change these passwords before deploying the application.
+## Eloquent Examples
 
-## Learning Laravel
+```php
+$student->courses;   // courses a student is registered for
+$course->students;   // students registered for a course
+$lecturer->courses;  // courses assigned to a lecturer
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Screenshots
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Login
+![Login](docs/screenshots/01-login.png)
 
-## Laravel Sponsors
+### Admin: Students
+![Admin students](docs/screenshots/02-admin-students.png)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Courses
+![Courses](docs/screenshots/03-courses.png)
 
-### Premium Partners
+### Course Registration
+![Registration](docs/screenshots/04-registration.png)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Duplicate Registration Error
+![Duplicate error](docs/screenshots/05-duplicate-error.png)
 
-## Contributing
+### Lecturer: Assigned Courses
+![Lecturer view](docs/screenshots/06-lecturer.png)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Student: My Registrations
+![Student view](docs/screenshots/07-student.png)
